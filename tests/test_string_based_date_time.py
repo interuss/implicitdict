@@ -44,10 +44,10 @@ def test_consistency():
 
     t = arrow.get("1234-01-23T12:34:56.12345678")
     sbdt = StringBasedDateTime(t)
-    assert "12345678" not in sbdt  # arrow only stores integer microseconds
+    assert "12345678" not in sbdt  # arrow only stores (after rounding) integer microseconds
 
     with pytest.raises(ValueError):  # unconverted data remains (datetime only parses down to microseconds)
-        _ = datetime.strptime("1234-01-23T12:34:56.12345678", "%Y-%m-%dT%H:%M:%S.%f")
+        datetime.strptime("1234-01-23T12:34:56.12345678", "%Y-%m-%dT%H:%M:%S.%f")
 
 
 def test_non_mutation():
@@ -55,15 +55,21 @@ def test_non_mutation():
 
     s = "2022-02-01T01:01:00.123456789123456789123456789"
     assert StringBasedDateTime(s) == s
-    assert StringBasedDateTime(s, reformat=True) != s
+    sbdt = StringBasedDateTime(s, reformat=True)
+    assert sbdt != s
+    assert sbdt.endswith('Z')
 
     s = "1800-12-01T18:15:00"
     assert StringBasedDateTime(s) == s
-    assert StringBasedDateTime(s, reformat=True) != s
+    sbdt = StringBasedDateTime(s, reformat=True)
+    assert sbdt != s
+    assert sbdt.endswith('Z')
 
     s = "2022-06-23T00:00:00+00:00"
     assert StringBasedDateTime(s) == s
-    assert StringBasedDateTime(s, reformat=True) != s
+    sbdt = StringBasedDateTime(s, reformat=True)
+    assert sbdt != s
+    assert sbdt.endswith('Z')
 
 
 def test_zulu_default():
