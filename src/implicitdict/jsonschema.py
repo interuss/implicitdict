@@ -95,6 +95,7 @@ def make_json_schema(
         schema["description"] = schema_vars.description
 
     if required_fields:
+        required_fields.sort()
         schema["required"] = required_fields
 
     schema_repository[schema_vars.name] = schema
