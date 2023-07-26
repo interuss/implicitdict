@@ -10,19 +10,20 @@ import jsonschema
 from .test_types import ContainerData, InheritanceData, NestedDefinitionsData, NormalUsageData, OptionalData, PropertiesData, SpecialTypesData
 
 
+def _resolver(t: Type) -> SchemaVars:
+    def path_to(t_dest: Type, t_src: Type) -> str:
+        return "#/definitions/" + t_dest.__module__ + t_dest.__qualname__
+
+    full_name = t.__module__ + t.__qualname__
+
+    return SchemaVars(name=full_name, path_to=path_to)
+
+
 def _verify_schema_validation(obj, obj_type: Type[ImplicitDict]) -> None:
-    def resolver(t: Type) -> SchemaVars:
-        def path_to(t_dest: Type, t_src: Type) -> str:
-            return "#/definitions/" + t_dest.__module__ + t_dest.__qualname__
-
-        full_name = t.__module__ + t.__qualname__
-
-        return SchemaVars(name=full_name, path_to=path_to)
-
     repo = {}
-    implicitdict.jsonschema.make_json_schema(obj_type, resolver, repo)
+    implicitdict.jsonschema.make_json_schema(obj_type, _resolver, repo)
 
-    name = resolver(obj_type).name
+    name = _resolver(obj_type).name
     schema = repo[name]
     del repo[name]
     if repo:
@@ -49,6 +50,18 @@ def _verify_schema_validation(obj, obj_type: Type[ImplicitDict]) -> None:
 def test_basic_usage():
     data: NormalUsageData = ImplicitDict.parse({'foo': 'asdf', 'bar': 1}, NormalUsageData)
     _verify_schema_validation(data, NormalUsageData)
+
+
+def test_field_docstrings():
+    repo = {}
+    implicitdict.jsonschema.make_json_schema(NormalUsageData, _resolver, repo)
+    name = _resolver(NormalUsageData).name
+    schema = repo[name]
+    props = schema["properties"]
+
+    assert props["foo"]["description"] == "The foo characterizing the data."
+    assert props["bar"]["description"] == "The bar of the data.\n\nIndents should not be included in docstrings."
+    assert props["baz"]["description"] == "If this baz is specified, it provides additional information.\n\nFinal docstring newlines should be omitted."
 
 
 def test_containers():

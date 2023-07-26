@@ -64,8 +64,18 @@ class MutabilityData(ImplicitDict):
 
 class NormalUsageData(ImplicitDict):
     foo: str
+    """The foo characterizing the data."""
+
     bar: int = 0
+    """The bar of the data.
+    
+    Indents should not be included in docstrings."""
+
     baz: Optional[float]
+    """If this baz is specified, it provides additional information.
+    
+    Final docstring newlines should be omitted.
+    """
 
 
 class OptionalData(ImplicitDict):

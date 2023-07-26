@@ -102,6 +102,22 @@ def make_json_schema(
 
 
 def _schema_for(value_type: Type, schema_vars_resolver: SchemaVarsResolver, schema_repository: Dict[str, dict], context: Type) -> Tuple[dict, bool]:
+    """Get the JSON Schema representation of the value_type.
+
+    Args:
+        value_type: Data type for which to return a JSON Schema.
+        schema_vars_resolver: Mapping from data type to information about the schema for that data type.
+        schema_repository: If the schema for this data type needs to refer to schemas for other data types, those data
+            types must already be present in this repository or else they will be added to it during this function.
+        context: The parent/top-level JSON Schema in which the schema for value_type is being included (affects the $ref
+            paths used to refer to external schemas).
+
+    Returns:
+        * JSON Schema representation of the value_type
+        * Boolean indication of whether the value_type is optional as a field in an ImplicitDict.
+          E.g., _schema_for(Optional[float], ...) would indicate True because an Optional[float] field within an
+          ImplicitDict would be an optional field in that object.
+    """
     generic_type = get_origin(value_type)
     if generic_type:
         # Type is generic
