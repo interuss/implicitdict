@@ -161,3 +161,46 @@ class NestedDefinitionsData(ImplicitDict):
     @staticmethod
     def example_value():
         return ImplicitDict.parse({"special_types": {"datetime": datetime.utcnow().isoformat(), "timedelta": "12h", "yesno": "Yes", "boolean": "true"}}, NestedDefinitionsData)
+
+
+class MassiveNestingData(ImplicitDict):
+    children: Optional[List["MassiveNestingData"]]
+    foo: str
+    bar: int = 0
+
+    @staticmethod
+    def example_value():
+        return ImplicitDict.parse(
+            {
+                "foo": "1a",
+                "children": [
+                    {
+                        "foo": "1a 2a"
+                    },
+                    {
+                        "foo": "1a 2b",
+                        "children": [
+                            {
+                                "foo": "1a 2b 3",
+                                "children": [
+                                    {
+                                        "foo": "1a 2b 3 4a",
+                                        "bar": 123
+                                    },
+                                    {
+                                        "foo": "1a 2b 3 4b",
+                                        "bar": 456
+                                    },
+                                    {
+                                        "foo": "1a 2b 3 4c",
+                                        "bar": 789,
+                                        "children": []
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            MassiveNestingData
+        )
