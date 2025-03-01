@@ -29,7 +29,7 @@ authors = [
 description = "ImplicitDict base class that turns a subclass into a dict indexing attributes, making [de]serialization easy for complex typing-annotated data types."
 readme = "README.md"
 license = { file = "LICENSE.md" }
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: Apache Software License",
@@ -37,7 +37,7 @@ classifiers = [
 ]
 dependencies = ["arrow", "jsonschema", "pytimeparse"]
 [project.optional-dependencies]
-dev = ["pytest==5.0.0", "pytest-cov[all]", "black==21.10b0"]
+dev = ["pytest==8.3.4", "pytest-cov[all]", "black==25.1.0"]
 [project.urls]
 "Homepage" = "https://github.com/interuss/implicitdict"
 "Bug Tracker" = "https://github.com/interuss/implicitdict/issues"
