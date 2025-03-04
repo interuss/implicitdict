@@ -38,14 +38,16 @@ class QueryError(RuntimeError):
     queries: List[Query]
 
 
+def _perform_docstring_parsing_test():
+    repo = {}
+    make_json_schema(Query, lambda t: SchemaVars(name=t.__name__), repo)
+
+
 def test_docpattern():
     """Tests issue #13 'Regex gets incorrect matches'"""
 
     # Perform actual test in separate process with timeout
-    def perform_test():
-        repo = {}
-        make_json_schema(Query, lambda t: SchemaVars(name=t.__name__), repo)
-    test_process = multiprocessing.Process(target=perform_test, args=[])
+    test_process = multiprocessing.Process(target=_perform_docstring_parsing_test, args=[])
     test_process.start()
     test_process.join(timeout=1)
     assert test_process.exitcode is not None, "make_json_schema did not complete within the time limit"
