@@ -45,7 +45,6 @@ def test_docpattern():
     def perform_test():
         repo = {}
         make_json_schema(Query, lambda t: SchemaVars(name=t.__name__), repo)
-        print(repo)
     test_process = multiprocessing.Process(target=perform_test, args=[])
     test_process.start()
     test_process.join(timeout=1)
