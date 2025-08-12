@@ -1,6 +1,8 @@
+# This file use old typing style on purpose to test compatibiliy (noqa
+# comments)
 import enum
 from datetime import datetime, timezone
-from typing import List, Optional
+from typing import List, Optional  # noqa UP035
 
 from implicitdict import ImplicitDict, StringBasedDateTime, StringBasedTimeDelta
 
@@ -13,10 +15,10 @@ class MySpecialClass(str):
 
 class ContainerData(ImplicitDict):
     single_value: MySpecialClass
-    value_list: List[MySpecialClass]
-    optional_list: Optional[List[MySpecialClass]]
-    optional_value_list: List[Optional[MySpecialClass]]
-    list_of_lists: List[List[MySpecialClass]]
+    value_list: List[MySpecialClass]  # noqa UP006
+    optional_list: Optional[List[MySpecialClass]]  # noqa UP006,UP045
+    optional_value_list: List[Optional[MySpecialClass]]  # noqa UP006,UP045
+    list_of_lists: List[List[MySpecialClass]]  # noqa UP006
 
     @staticmethod
     def example_value():
@@ -35,7 +37,7 @@ class ContainerData(ImplicitDict):
 class InheritanceData(ImplicitDict):
     foo: str
     bar: int = 0
-    baz: Optional[float]
+    baz: Optional[float]  # noqa UP045
     has_default_baseclass: str = "In MyData"
 
     def hello(self) -> str:
@@ -50,19 +52,19 @@ class InheritanceData(ImplicitDict):
 
 
 class MySubclass(InheritanceData):
-    buzz: Optional[str]
+    buzz: Optional[str]  # noqa UP045
     has_default_subclass: str = "In MySubclass"
 
     def hello(self) -> str:
         return "MySubclass"
 
 
-class SpecialListClass(List[MySpecialClass]):
+class SpecialListClass(List[MySpecialClass]):  # noqa UP006
     def hello(self) -> str:
         return "SpecialListClass"
 
 
-class SpecialComplexListClass(List[MySubclass]):
+class SpecialComplexListClass(List[MySubclass]):  # noqa UP006
     def hello(self) -> str:
         return "SpecialComplexListClass"
 
@@ -80,9 +82,9 @@ class SpecialSubclassesContainer(ImplicitDict):
 
 class MutabilityData(ImplicitDict):
     primitive: str
-    list_of_primitives: List[str]
+    list_of_primitives: List[str]  # noqa UP006
     generic_dict: dict
-    subtype: Optional["MutabilityData"]
+    subtype: Optional["MutabilityData"]  # noqa UP045
 
 
 class NormalUsageData(ImplicitDict):
@@ -94,7 +96,7 @@ class NormalUsageData(ImplicitDict):
 
     Indents should not be included in docstrings."""
 
-    baz: Optional[float]
+    baz: Optional[float]  # noqa UP045
     """If this baz is specified, it provides additional information.
 
     Final docstring newlines should be omitted.
@@ -103,10 +105,10 @@ class NormalUsageData(ImplicitDict):
 
 class OptionalData(ImplicitDict):
     required_field: str
-    optional_field1: Optional[str]
+    optional_field1: Optional[str]  # noqa UP045
     field_with_default: str = "default value"
-    optional_field2_with_none_default: Optional[str] = None
-    optional_field3_with_default: Optional[str] = "concrete default"
+    optional_field2_with_none_default: Optional[str] = None  # noqa UP045
+    optional_field3_with_default: Optional[str] = "concrete default"  # noqa UP045
     new_style_optional: str | None
 
     @staticmethod

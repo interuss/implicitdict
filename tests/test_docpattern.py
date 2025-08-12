@@ -1,5 +1,4 @@
 import multiprocessing
-from typing import List, Optional, Type
 
 from implicitdict import ImplicitDict
 from implicitdict.jsonschema import SchemaVars, make_json_schema
@@ -10,10 +9,10 @@ class ResponseType(ImplicitDict):
 
 
 class Query(ImplicitDict):
-    participant_id: Optional[str]
+    participant_id: str | None
     """If specified, identifier of the USS/participant hosting the server involved in this query."""
 
-    def parse_json_result(self, parse_type: Type[ResponseType]) -> ResponseType:
+    def parse_json_result(self, parse_type: type[ResponseType]) -> ResponseType:
         """Parses the JSON result into the specified type.
 
         Args:
@@ -35,7 +34,7 @@ class Query(ImplicitDict):
 class QueryError(RuntimeError):
     """Error encountered when interacting with a server in the UTM ecosystem."""
 
-    queries: List[Query]
+    queries: list[Query]
 
 
 def _perform_docstring_parsing_test():

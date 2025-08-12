@@ -1,6 +1,6 @@
 import json
 from enum import Enum
-from typing import Dict, List, Literal, Optional
+from typing import Literal
 
 import pytest
 
@@ -60,7 +60,7 @@ class Features(ImplicitDict):
     t_start: StringBasedDateTime
     my_duration: StringBasedTimeDelta
     my_literal: Literal["Must be this string"]
-    nested: Optional[NormalUsageData]
+    nested: NormalUsageData | None
 
 
 def test_features():
@@ -101,10 +101,10 @@ def test_features():
 
 
 class NestedStructures(ImplicitDict):
-    my_list: List[NormalUsageData]
-    my_list_2: List[List[int]]
-    my_list_3: List[List[List[int]]]
-    my_dict: Dict[str, List[float]]
+    my_list: list[NormalUsageData]
+    my_list_2: list[list[int]]
+    my_list_3: list[list[list[int]]]
+    my_dict: dict[str, list[float]]
 
 
 def test_nested_structures():
