@@ -1,10 +1,11 @@
 from __future__ import annotations
-import json
-from typing import Optional, List
 
-from implicitdict import ImplicitDict
+import json
+from typing import List, Optional
 
 import pytest
+
+from implicitdict import ImplicitDict
 
 
 # This object must be defined with future annotations as Python 3.8 will not resolve string-based forward references correctly
@@ -19,35 +20,23 @@ class MassiveNestingData(ImplicitDict):
             {
                 "foo": "1a",
                 "children": [
-                    {
-                        "foo": "1a 2a"
-                    },
+                    {"foo": "1a 2a"},
                     {
                         "foo": "1a 2b",
                         "children": [
                             {
                                 "foo": "1a 2b 3",
                                 "children": [
-                                    {
-                                        "foo": "1a 2b 3 4a",
-                                        "bar": 123
-                                    },
-                                    {
-                                        "foo": "1a 2b 3 4b",
-                                        "bar": 456
-                                    },
-                                    {
-                                        "foo": "1a 2b 3 4c",
-                                        "bar": 789,
-                                        "children": []
-                                    }
-                                ]
+                                    {"foo": "1a 2b 3 4a", "bar": 123},
+                                    {"foo": "1a 2b 3 4b", "bar": 456},
+                                    {"foo": "1a 2b 3 4c", "bar": 789, "children": []},
+                                ],
                             }
-                        ]
-                    }
-                ]
+                        ],
+                    },
+                ],
             },
-            MassiveNestingData
+            MassiveNestingData,
         )
 
 

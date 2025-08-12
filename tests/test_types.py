@@ -1,6 +1,6 @@
 import enum
 from datetime import datetime, timezone
-from typing import Optional, List
+from typing import List, Optional
 
 from implicitdict import ImplicitDict, StringBasedDateTime, StringBasedTimeDelta
 
@@ -26,8 +26,10 @@ class ContainerData(ImplicitDict):
                 "value_list": ["value1", "value2"],
                 "optional_list": ["bar"],
                 "optional_value_list": ["baz", None],
-                "list_of_lists": [["list1v1", "list1v2"], ["list2v1"]]
-            }, ContainerData)
+                "list_of_lists": [["list1v1", "list1v2"], ["list2v1"]],
+            },
+            ContainerData,
+        )
 
 
 class InheritanceData(ImplicitDict):
@@ -44,7 +46,7 @@ class InheritanceData(ImplicitDict):
 
     @staticmethod
     def example_value():
-        return ImplicitDict.parse({'foo': 'asdf', 'bar': 1}, InheritanceData)
+        return ImplicitDict.parse({"foo": "asdf", "bar": 1}, InheritanceData)
 
 
 class MySubclass(InheritanceData):
@@ -71,7 +73,9 @@ class SpecialSubclassesContainer(ImplicitDict):
 
     @staticmethod
     def example_value():
-        return ImplicitDict.parse({'special_list': ['foo'], 'special_complex_list': [{'foo': 'oof'}]}, SpecialSubclassesContainer)
+        return ImplicitDict.parse(
+            {"special_list": ["foo"], "special_complex_list": [{"foo": "oof"}]}, SpecialSubclassesContainer
+        )
 
 
 class MutabilityData(ImplicitDict):
@@ -128,8 +132,12 @@ class OptionalData(ImplicitDict):
             "minimally_defined": OptionalData(required_field="foo1"),
             "provide_optional_field": OptionalData(required_field="foo1", optional_field1="foo2"),
             "provide_optional_field_as_none": OptionalData(required_field="foo1", optional_field1=None),
-            "provide_optional_field_with_none_default_as_none": OptionalData(required_field="foo1", optional_field2_with_none_default=None),
-            "provide_optional_field_with_default_as_none": OptionalData(required_field="foo1", optional_field3_with_default=None)
+            "provide_optional_field_with_none_default_as_none": OptionalData(
+                required_field="foo1", optional_field2_with_none_default=None
+            ),
+            "provide_optional_field_with_default_as_none": OptionalData(
+                required_field="foo1", optional_field3_with_default=None
+            ),
         }
 
 
@@ -138,10 +146,10 @@ class PropertiesData(ImplicitDict):
 
     @property
     def bar(self) -> str:
-        return self.foo + 'bar'
+        return self.foo + "bar"
 
     def get_baz(self) -> str:
-        return self.foo + 'baz'
+        return self.foo + "baz"
 
     def set_baz(self, value: str) -> None:
         self.foo = value
@@ -150,7 +158,7 @@ class PropertiesData(ImplicitDict):
 
     @property
     def booz(self) -> str:
-        return self.foo + 'booz'
+        return self.foo + "booz"
 
     @booz.setter
     def booz(self, value: str) -> None:
@@ -158,7 +166,7 @@ class PropertiesData(ImplicitDict):
 
     @staticmethod
     def example_value():
-        return PropertiesData(foo='foo')
+        return PropertiesData(foo="foo")
 
 
 class YesNo(str, enum.Enum):
@@ -174,7 +182,10 @@ class SpecialTypesData(ImplicitDict):
 
     @staticmethod
     def example_value():
-        return ImplicitDict.parse({"datetime": datetime.now(timezone.utc).isoformat(), "timedelta": "12h", "yesno": "Yes", "boolean": "true"}, SpecialTypesData)
+        return ImplicitDict.parse(
+            {"datetime": datetime.now(timezone.utc).isoformat(), "timedelta": "12h", "yesno": "Yes", "boolean": "true"},
+            SpecialTypesData,
+        )
 
 
 class NestedDefinitionsData(ImplicitDict):
@@ -182,4 +193,14 @@ class NestedDefinitionsData(ImplicitDict):
 
     @staticmethod
     def example_value():
-        return ImplicitDict.parse({"special_types": {"datetime": datetime.now(timezone.utc).isoformat(), "timedelta": "12h", "yesno": "Yes", "boolean": "true"}}, NestedDefinitionsData)
+        return ImplicitDict.parse(
+            {
+                "special_types": {
+                    "datetime": datetime.now(timezone.utc).isoformat(),
+                    "timedelta": "12h",
+                    "yesno": "Yes",
+                    "boolean": "true",
+                }
+            },
+            NestedDefinitionsData,
+        )
