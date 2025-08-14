@@ -36,16 +36,16 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-  "arrow==1.2.3",
-  "jsonschema==4.17.3",
-  "pytimeparse==1.1.8"
+  "arrow",
+  "jsonschema",
+  "pytimeparse"
 ]
 
 [dependency-groups]
 dev = [
-  "pytest==8.3.4",
-  "pytest-cov[all]",
-  "black==24.8.0"
+  "pytest",
+  "pytest-cov",
+  "black",
 ]
 
 [project.urls]
