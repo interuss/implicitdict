@@ -75,6 +75,6 @@ def test_behavior_timedelta():
         assert sbtd.timedelta == dt
         s = str(sbtd)
         with pytest.raises(AttributeError):  # 'str' object has no attribute 'timedelta'
-            assert s.timedelta == dt
+            assert s.timedelta == dt  # pyright:ignore[reportAttributeAccessIssue]
         sbtd2 = StringBasedTimeDelta(s)
         assert sbtd2.timedelta == dt
