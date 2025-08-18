@@ -5,7 +5,6 @@ import pytest
 
 from implicitdict import StringBasedDateTime
 
-
 ZERO_SKEW = timedelta(microseconds=0)
 
 
@@ -28,14 +27,14 @@ def test_consistency():
     sbdt = StringBasedDateTime(t.isoformat())
     assert abs(sbdt.datetime - t) <= ZERO_SKEW
 
-    t = arrow.now('US/Pacific').datetime
+    t = arrow.now("US/Pacific").datetime
     sbdt = StringBasedDateTime(t)
     assert abs(sbdt.datetime - t) <= ZERO_SKEW
 
     sbdt = StringBasedDateTime(t.isoformat())
     assert abs(sbdt.datetime - t) <= ZERO_SKEW
 
-    t = arrow.now('US/Pacific')
+    t = arrow.now("US/Pacific")
     sbdt = StringBasedDateTime(t)
     assert abs(sbdt.datetime - t) <= ZERO_SKEW
 
@@ -57,24 +56,24 @@ def test_non_mutation():
     assert StringBasedDateTime(s) == s
     sbdt = StringBasedDateTime(s, reformat=True)
     assert sbdt != s
-    assert sbdt.endswith('Z')
+    assert sbdt.endswith("Z")
 
     s = "1800-12-01T18:15:00"
     assert StringBasedDateTime(s) == s
     sbdt = StringBasedDateTime(s, reformat=True)
     assert sbdt != s
-    assert sbdt.endswith('Z')
+    assert sbdt.endswith("Z")
 
     s = "2022-06-23T00:00:00+00:00"
     assert StringBasedDateTime(s) == s
     sbdt = StringBasedDateTime(s, reformat=True)
     assert sbdt != s
-    assert sbdt.endswith('Z')
+    assert sbdt.endswith("Z")
 
 
 def test_zulu_default():
     """When a non-string datetime is provided, expect the string representation to use Z as the UTC timezone."""
 
-    assert StringBasedDateTime(datetime.now(timezone.utc)).endswith('Z')
-    assert StringBasedDateTime(arrow.utcnow().datetime).endswith('Z')
-    assert StringBasedDateTime(arrow.utcnow()).endswith('Z')
+    assert StringBasedDateTime(datetime.now(timezone.utc)).endswith("Z")
+    assert StringBasedDateTime(arrow.utcnow().datetime).endswith("Z")
+    assert StringBasedDateTime(arrow.utcnow()).endswith("Z")

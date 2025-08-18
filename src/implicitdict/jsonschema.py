@@ -1,13 +1,13 @@
-import inspect
-from dataclasses import dataclass
-from datetime import datetime
 import enum
+import inspect
 import json
 import re
+from dataclasses import dataclass
+from datetime import datetime
 from types import UnionType
-from typing import get_args, get_origin, get_type_hints, Dict, Literal, Optional, Type, Union, Tuple, Callable
+from typing import Callable, Dict, Literal, Optional, Tuple, Type, Union, get_args, get_origin, get_type_hints
 
-from . import ImplicitDict, _fullname, _get_fields, StringBasedDateTime, StringBasedTimeDelta
+from . import ImplicitDict, StringBasedDateTime, StringBasedTimeDelta, _fullname, _get_fields
 
 
 @dataclass
@@ -32,9 +32,9 @@ _implicitdict_doc = inspect.getdoc(ImplicitDict)
 
 
 def make_json_schema(
-        schema_type: Type[ImplicitDict],
-        schema_vars_resolver: SchemaVarsResolver,
-        schema_repository: Dict[str, dict],
+    schema_type: Type[ImplicitDict],
+    schema_vars_resolver: SchemaVarsResolver,
+    schema_repository: Dict[str, dict],
 ) -> None:
     """Create JSON Schema for the specified schema type and all dependencies.
 
@@ -64,10 +64,14 @@ def make_json_schema(
             if hasattr(schema_type, field):
                 value_type = type(getattr(schema_type, field))
             else:
-                raise ValueError(f"Could not make JSON Schema for {_fullname(schema_type)} because field `{field}` does not have type hints nor default values")
+                raise ValueError(
+                    f"Could not make JSON Schema for {_fullname(schema_type)} because field `{field}` does not have type hints nor default values"
+                )
 
         try:
-            properties[field], is_optional = _schema_for(value_type, schema_vars_resolver, schema_repository, schema_type)
+            properties[field], is_optional = _schema_for(
+                value_type, schema_vars_resolver, schema_repository, schema_type
+            )
             if not is_optional and not hasattr(schema_type, field):
                 required_fields.append(field)
         except NotImplementedError as e:
@@ -78,11 +82,7 @@ def make_json_schema(
         if field in field_docs:
             properties[field]["description"] = field_docs[field]
 
-    schema = {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "type": "object",
-        "properties": properties
-    }
+    schema = {"$schema": "https://json-schema.org/draft/2020-12/schema", "type": "object", "properties": properties}
     if schema_vars.schema_id is not None:
         schema["$id"] = schema_vars.schema_id
 
@@ -102,7 +102,9 @@ def make_json_schema(
     schema_repository[schema_vars.name] = schema
 
 
-def _schema_for(value_type: Type, schema_vars_resolver: SchemaVarsResolver, schema_repository: Dict[str, dict], context: Type) -> Tuple[dict, bool]:
+def _schema_for(
+    value_type: Type, schema_vars_resolver: SchemaVarsResolver, schema_repository: Dict[str, dict], context: Type
+) -> Tuple[dict, bool]:
     """Get the JSON Schema representation of the value_type.
 
     Args:
@@ -130,16 +132,16 @@ def _schema_for(value_type: Type, schema_vars_resolver: SchemaVarsResolver, sche
         elif generic_type is dict:
             schema = {
                 "type": "object",
-                "properties": {
-                    "$ref": {"type": "string", "description": "Path to content that replaces the $ref"}
-                }
+                "properties": {"$ref": {"type": "string", "description": "Path to content that replaces the $ref"}},
             }
             if len(arg_types) >= 2:
                 value_schema, _ = _schema_for(arg_types[1], schema_vars_resolver, schema_repository, context)
                 schema["additionalProperties"] = value_schema
             return schema, False
 
-        elif (generic_type is Union or generic_type is UnionType) and len(arg_types) == 2 and arg_types[1] is type(None):
+        elif (
+            (generic_type is Union or generic_type is UnionType) and len(arg_types) == 2 and arg_types[1] is type(None)
+        ):
             # Type is an Optional declaration
             subschema, _ = _schema_for(arg_types[0], schema_vars_resolver, schema_repository, context)
             schema = json.loads(json.dumps(subschema))
@@ -155,7 +157,9 @@ def _schema_for(value_type: Type, schema_vars_resolver: SchemaVarsResolver, sche
             return {"type": "string", "enum": [arg_types[0]]}, False
 
         else:
-            raise NotImplementedError(f"Automatic JSON schema generation for {value_type} generic type is not yet implemented")
+            raise NotImplementedError(
+                f"Automatic JSON schema generation for {value_type} generic type is not yet implemented"
+            )
 
     schema_vars = schema_vars_resolver(value_type)
 
@@ -163,16 +167,16 @@ def _schema_for(value_type: Type, schema_vars_resolver: SchemaVarsResolver, sche
         make_json_schema(value_type, schema_vars_resolver, schema_repository)
         return {"$ref": schema_vars.path_to(value_type, context)}, False
 
-    if value_type == bool or issubclass(value_type, bool):
+    if value_type is bool or issubclass(value_type, bool):
         return {"type": "boolean"}, False
 
-    if value_type == float or issubclass(value_type, float):
+    if value_type is float or issubclass(value_type, float):
         return {"type": "number"}, False
 
-    if value_type == int or issubclass(value_type, int):
+    if value_type is int or issubclass(value_type, int):
         return {"type": "integer"}, False
 
-    if value_type == str or issubclass(value_type, str):
+    if value_type is str or issubclass(value_type, str):
         schema = {"type": "string"}
         if issubclass(value_type, StringBasedDateTime):
             schema["format"] = "date-time"
@@ -185,7 +189,7 @@ def _schema_for(value_type: Type, schema_vars_resolver: SchemaVarsResolver, sche
     if value_type == datetime or issubclass(value_type, datetime):
         return {"type": "string", "format": "date-time"}, False
 
-    if value_type == dict or issubclass(value_type, dict):
+    if value_type is dict or issubclass(value_type, dict):
         return {"type": "object"}, False
 
     if hasattr(value_type, "__orig_bases__") and value_type.__orig_bases__:
@@ -204,7 +208,7 @@ def _field_docs_for(t: Type[ImplicitDict]) -> Dict[str, str]:
         lines = m.group(3).split("\n")
         for i in range(1, len(lines)):
             if lines[i].startswith(indent):
-                lines[i] = lines[i][len(indent):]
+                lines[i] = lines[i][len(indent) :]
         while not lines[-1]:
             lines = lines[0:-1]
         docstring = "\n".join(lines)

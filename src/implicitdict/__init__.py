@@ -1,24 +1,21 @@
+import datetime
 import inspect
-from dataclasses import dataclass
 import re
+from dataclasses import dataclass
+from datetime import datetime as datetime_type
+from types import UnionType
+from typing import Dict, Literal, Optional, Set, Tuple, Type, Union, get_args, get_origin, get_type_hints
 
 import arrow
-import datetime
-from datetime import datetime as datetime_type
-from typing import get_args, get_origin, get_type_hints, Dict, Literal, \
-    Optional, Type, Union, Set, Tuple
-from types import UnionType
-
 import pytimeparse
 
-
 _DICT_FIELDS = set(dir({}))
-_KEY_FIELDS_INFO = '_fields_info'
+_KEY_FIELDS_INFO = "_fields_info"
 _PARSING_ERRORS = (ValueError, TypeError)
 
 
 def _bubble_up_parse_error(child: Union[ValueError, TypeError], field: str) -> Union[ValueError, TypeError]:
-    location_regex = r'^At ([A-Za-z0-9_.[\]]*):((?:.|[\n\r])*)$'
+    location_regex = r"^At ([A-Za-z0-9_.[\]]*):((?:.|[\n\r])*)$"
     m = re.search(location_regex, str(child))
     if m:
         suffix = m.group(1)
@@ -95,7 +92,9 @@ class ImplicitDict(dict):
     @classmethod
     def parse(cls, source: Dict, parse_type: Type):
         if not isinstance(source, dict):
-            raise ValueError(f'Expected to find dictionary data to populate {parse_type.__name__} object but instead found {type(source).__name__} type')
+            raise ValueError(
+                f"Expected to find dictionary data to populate {parse_type.__name__} object but instead found {type(source).__name__} type"
+            )
         kwargs = {}
         hints = get_type_hints(parse_type)
         for key, value in source.items():
@@ -110,7 +109,7 @@ class ImplicitDict(dict):
                 kwargs[key] = value
         return parse_type(**kwargs)
 
-    def __init__(self, previous_instance: Optional[dict]=None, **kwargs):
+    def __init__(self, previous_instance: Optional[dict] = None, **kwargs):
         ancestor_kwargs = {}
         subtype = type(self)
 
@@ -169,7 +168,9 @@ class ImplicitDict(dict):
                     self[key] = value
                     return
                 else:
-                    raise AttributeError('Attribute "{}" is not defined for "{}" object'.format(key, type(self).__name__))
+                    raise AttributeError(
+                        'Attribute "{}" is not defined for "{}" object'.format(key, type(self).__name__)
+                    )
         super(ImplicitDict, self).__setattr__(key, value)
 
     def has_field_with_value(self, field_name: str) -> bool:
@@ -186,7 +187,9 @@ def _parse_value(value, value_type: Type):
                 value_list = [v for v in value]
             except TypeError as e:
                 if "not iterable" in str(e):
-                    raise ValueError(f"Cannot parse non-iterable value '{value}' of type '{type(value).__name__}' into list type '{value_type}'")
+                    raise ValueError(
+                        f"Cannot parse non-iterable value '{value}' of type '{type(value).__name__}' into list type '{value_type}'"
+                    )
                 raise
             result = []
             for i, v in enumerate(value_list):
@@ -208,7 +211,9 @@ def _parse_value(value, value_type: Type):
                 result[parsed_key] = parsed_value
             return result
 
-        elif (generic_type is Union or generic_type is UnionType) and len(arg_types) == 2 and arg_types[1] is type(None):
+        elif (
+            (generic_type is Union or generic_type is UnionType) and len(arg_types) == 2 and arg_types[1] is type(None)
+        ):
             # Type is an Optional declaration
             if value is None:
                 # An optional field specified explicitly as None is equivalent to
@@ -220,11 +225,11 @@ def _parse_value(value, value_type: Type):
         elif generic_type is Literal and len(arg_types) == 1:
             # Type is a Literal (parsed value must match specified value)
             if value != arg_types[0]:
-                raise ValueError('Value {} does not match required Literal {}'.format(value, arg_types[0]))
+                raise ValueError("Value {} does not match required Literal {}".format(value, arg_types[0]))
             return value
 
         else:
-            raise ValueError(f'Automatic parsing of {value_type} type is not yet implemented')
+            raise ValueError(f"Automatic parsing of {value_type} type is not yet implemented")
 
     elif issubclass(value_type, ImplicitDict):
         # value is an ImplicitDict
@@ -242,7 +247,6 @@ def _parse_value(value, value_type: Type):
 class FieldsInfo(object):
     all_fields: Set[str]
     optional_fields: Set[str]
-
 
 
 def _get_fields(subtype: Type) -> Tuple[Set[str], Set[str]]:
@@ -279,11 +283,11 @@ def _get_fields(subtype: Type) -> Tuple[Set[str], Set[str]]:
         attributes = set()
         for key in dir(subtype):
             if (
-                    key != _KEY_FIELDS_INFO
-                    and key not in _DICT_FIELDS
-                    and key[0:2] != '__'
-                    and not callable(getattr(subtype, key))
-                    and not isinstance(getattr(subtype, key), property)
+                key != _KEY_FIELDS_INFO
+                and key not in _DICT_FIELDS
+                and key[0:2] != "__"
+                and not callable(getattr(subtype, key))
+                and not isinstance(getattr(subtype, key), property)
             ):
                 all_fields.add(key)
                 attributes.add(key)
@@ -301,10 +305,7 @@ def _get_fields(subtype: Type) -> Tuple[Set[str], Set[str]]:
             if key not in annotations:
                 optional_fields.add(key)
 
-        fields_info_by_type[subtype_name] = FieldsInfo(
-            all_fields=all_fields,
-            optional_fields=optional_fields
-        )
+        fields_info_by_type[subtype_name] = FieldsInfo(all_fields=all_fields, optional_fields=optional_fields)
     result = fields_info_by_type[subtype_name]
     return result.all_fields, result.optional_fields
 
@@ -335,12 +336,12 @@ class StringBasedTimeDelta(str):
             s = str(dt) if reformat else value
         elif isinstance(value, float) or isinstance(value, int):
             dt = datetime.timedelta(seconds=value)
-            s = f'{value}s'
+            s = f"{value}s"
         elif isinstance(value, datetime.timedelta):
             dt = value
             s = str(dt)
         else:
-            raise ValueError(f'Could not parse type {type(value).__name__} into StringBasedTimeDelta')
+            raise ValueError(f"Could not parse type {type(value).__name__} into StringBasedTimeDelta")
         str_value = str.__new__(cls, s)
         str_value.timedelta = dt
         return str_value
@@ -367,8 +368,8 @@ class StringBasedDateTime(str):
         else:
             s = t_arrow.isoformat()
             zuluize = True
-        if zuluize and s.endswith('+00:00'):
-            s = s[0:-len('+00:00')] + 'Z'
+        if zuluize and s.endswith("+00:00"):
+            s = s[0 : -len("+00:00")] + "Z"
         str_value = str.__new__(cls, s)
         str_value.datetime = t_arrow.datetime
         return str_value

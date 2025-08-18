@@ -16,58 +16,58 @@ def test_property_exclusion():
     """
     # Create class instance and ensure it works as expected
     data = PropertiesData.example_value()
-    assert data.bar == 'foobar'
-    assert data.baz == 'foobaz'
-    assert data.booz == 'foobooz'
+    assert data.bar == "foobar"
+    assert data.baz == "foobaz"
+    assert data.booz == "foobooz"
 
     # Serialize class instance and ensure the properties weren't serialized
     obj = json.loads(json.dumps(data))
-    assert 'bar' not in obj
-    assert 'baz' not in obj
-    assert 'booz' not in obj
+    assert "bar" not in obj
+    assert "baz" not in obj
+    assert "booz" not in obj
 
     # Ensure serialization can be deserialized to class instance
     data: PropertiesData = ImplicitDict.parse(obj, PropertiesData)
 
     # Ensure deserialized instance works as expected
-    assert data.bar == 'foobar'
-    assert data.baz == 'foobaz'
-    assert data.booz == 'foobooz'
+    assert data.bar == "foobar"
+    assert data.baz == "foobaz"
+    assert data.booz == "foobooz"
 
 
 class MyDict(dict):
     @property
     def foo(self) -> str:
-        return 'foo'
+        return "foo"
 
     def get_bar(self) -> str:
-        return self.foo + 'bar'
+        return self.foo + "bar"
 
     def set_bar(self, value: str) -> None:
-        self['bar'] = value
+        self["bar"] = value
 
     bar = property(get_bar, set_bar)
 
     @property
     def baz(self) -> str:
-        return self.foo + 'baz'
+        return self.foo + "baz"
 
     @baz.setter
     def baz(self, value: str) -> None:
-        self['baz'] = value
+        self["baz"] = value
 
 
 def test_dict_inheritance():
     """Demonstrate that classes inheriting dict do not have their properties serialized."""
     data = MyDict()
-    assert data.foo == 'foo'
-    assert data.bar == 'foobar'
-    assert data.baz == 'foobaz'
+    assert data.foo == "foo"
+    assert data.bar == "foobar"
+    assert data.baz == "foobaz"
 
-    data['booz'] = 'biz'
+    data["booz"] = "biz"
     deserialized = json.loads(json.dumps(data))
 
-    assert 'foo' not in deserialized
-    assert 'bar' not in deserialized
-    assert 'baz' not in deserialized
-    assert deserialized['booz'] == 'biz'
+    assert "foo" not in deserialized
+    assert "bar" not in deserialized
+    assert "baz" not in deserialized
+    assert deserialized["booz"] == "biz"

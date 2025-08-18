@@ -1,7 +1,8 @@
 import multiprocessing
 from typing import List, Optional, Type
+
 from implicitdict import ImplicitDict
-from implicitdict.jsonschema import make_json_schema, SchemaVars
+from implicitdict.jsonschema import SchemaVars, make_json_schema
 
 
 class ResponseType(ImplicitDict):
@@ -9,7 +10,6 @@ class ResponseType(ImplicitDict):
 
 
 class Query(ImplicitDict):
-
     participant_id: Optional[str]
     """If specified, identifier of the USS/participant hosting the server involved in this query."""
 

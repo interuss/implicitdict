@@ -6,7 +6,7 @@ from implicitdict import StringBasedTimeDelta
 
 
 def test_behavior_strings():
-    s = '1s'
+    s = "1s"
     sbtd = StringBasedTimeDelta(s)
     assert sbtd == s
     assert sbtd.timedelta.total_seconds() == 1
@@ -15,7 +15,7 @@ def test_behavior_strings():
     assert sbtd != s
     assert sbtd.timedelta.total_seconds() == 1
 
-    s = '1.1s'
+    s = "1.1s"
     sbtd = StringBasedTimeDelta(s)
     assert sbtd == s
     assert sbtd.timedelta.total_seconds() == 1.1
@@ -24,7 +24,7 @@ def test_behavior_strings():
     assert sbtd != s
     assert sbtd.timedelta.total_seconds() == 1.1
 
-    s = '1m'
+    s = "1m"
     sbtd = StringBasedTimeDelta(s)
     assert sbtd == s
     assert sbtd.timedelta.total_seconds() == 60
@@ -33,7 +33,7 @@ def test_behavior_strings():
     assert sbtd != s
     assert sbtd.timedelta.total_seconds() == 60
 
-    s = '5 hours, 34 minutes, 56 seconds'
+    s = "5 hours, 34 minutes, 56 seconds"
     sbtd = StringBasedTimeDelta(s)
     assert sbtd == s
     assert sbtd.timedelta.total_seconds() == 5 * 60 * 60 + 34 * 60 + 56
@@ -42,10 +42,10 @@ def test_behavior_strings():
     assert sbtd != s
     assert sbtd.timedelta.total_seconds() == 5 * 60 * 60 + 34 * 60 + 56
 
-    s = '0.1234567s'
+    s = "0.1234567s"
     sbtd = StringBasedTimeDelta(s)
     assert sbtd == s
-    assert '1234567' not in str(sbtd.timedelta.total_seconds())  # timedelta only stores integer microseconds
+    assert "1234567" not in str(sbtd.timedelta.total_seconds())  # timedelta only stores integer microseconds
 
     sbtd = StringBasedTimeDelta(s, reformat=True)
     assert sbtd != s
@@ -54,11 +54,11 @@ def test_behavior_strings():
 def test_behavior_seconds():
     for s in (1, 1.1, 0.5, 0.123456):
         sbtd = StringBasedTimeDelta(s)
-        assert sbtd.endswith('s')
+        assert sbtd.endswith("s")
         assert sbtd.timedelta.total_seconds() == s
 
     sbtd = StringBasedTimeDelta(0.1234567)
-    assert '1234567' not in str(sbtd.timedelta.total_seconds())  # timedelta only stores integer microseconds
+    assert "1234567" not in str(sbtd.timedelta.total_seconds())  # timedelta only stores integer microseconds
 
 
 def test_behavior_timedelta():

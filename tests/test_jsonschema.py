@@ -1,13 +1,22 @@
 import json
 from typing import Type
 
-import implicitdict.jsonschema
-from implicitdict.jsonschema import SchemaVars
-from implicitdict import ImplicitDict
 import jsonschema
 
-from .test_types import ContainerData, InheritanceData, NestedDefinitionsData, NormalUsageData, OptionalData, \
-    PropertiesData, SpecialTypesData, SpecialSubclassesContainer
+import implicitdict.jsonschema
+from implicitdict import ImplicitDict
+from implicitdict.jsonschema import SchemaVars
+
+from .test_types import (
+    ContainerData,
+    InheritanceData,
+    NestedDefinitionsData,
+    NormalUsageData,
+    OptionalData,
+    PropertiesData,
+    SpecialSubclassesContainer,
+    SpecialTypesData,
+)
 
 
 def _resolver(t: Type) -> SchemaVars:
@@ -48,7 +57,7 @@ def _verify_schema_validation(obj, obj_type: Type[ImplicitDict]) -> None:
 
 
 def test_basic_usage():
-    data: NormalUsageData = ImplicitDict.parse({'foo': 'asdf', 'bar': 1}, NormalUsageData)
+    data: NormalUsageData = ImplicitDict.parse({"foo": "asdf", "bar": 1}, NormalUsageData)
     _verify_schema_validation(data, NormalUsageData)
 
 
@@ -61,7 +70,10 @@ def test_field_docstrings():
 
     assert props["foo"]["description"] == "The foo characterizing the data."
     assert props["bar"]["description"] == "The bar of the data.\n\nIndents should not be included in docstrings."
-    assert props["baz"]["description"] == "If this baz is specified, it provides additional information.\n\nFinal docstring newlines should be omitted."
+    assert (
+        props["baz"]["description"]
+        == "If this baz is specified, it provides additional information.\n\nFinal docstring newlines should be omitted."
+    )
 
 
 def test_containers():

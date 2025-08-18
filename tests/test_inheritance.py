@@ -2,8 +2,14 @@ import json
 
 from implicitdict import ImplicitDict
 
-from .test_types import InheritanceData, MySubclass, SpecialSubclassesContainer, SpecialListClass, MySpecialClass, \
-    SpecialComplexListClass
+from .test_types import (
+    InheritanceData,
+    MySpecialClass,
+    MySubclass,
+    SpecialComplexListClass,
+    SpecialListClass,
+    SpecialSubclassesContainer,
+)
 
 
 def test_inheritance():
