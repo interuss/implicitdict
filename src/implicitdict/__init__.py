@@ -4,7 +4,7 @@ import re
 from dataclasses import dataclass
 from datetime import datetime as datetime_type
 from types import UnionType
-from typing import Literal, Optional, Union, get_args, get_origin, get_type_hints
+from typing import Literal, Optional, Union, get_args, get_origin, get_type_hints  # pyright:ignore[reportDeprecated]
 
 import arrow
 import pytimeparse
@@ -330,7 +330,10 @@ class StringBasedTimeDelta(str):
             reformat: If true, override a provided string with a string representation of the parsed timedelta.
         """
         if isinstance(value, str):
-            dt = datetime.timedelta(seconds=pytimeparse.parse(value))
+            seconds = pytimeparse.parse(value)
+            if seconds is None:
+                raise ValueError(f"Could not parse type {type(value).__name__} into StringBasedTimeDelta")
+            dt = datetime.timedelta(seconds=seconds)
             s = str(dt) if reformat else value
         elif isinstance(value, float) or isinstance(value, int):
             dt = datetime.timedelta(seconds=value)

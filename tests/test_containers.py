@@ -10,6 +10,7 @@ def test_container_item_value_casting():
     for v in containers.value_list:
         assert v.is_special
 
+    assert containers.optional_list is not None
     assert len(containers.optional_list) == 1
     assert containers.optional_list[0].is_special
 

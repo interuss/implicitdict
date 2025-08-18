@@ -6,7 +6,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
 from types import UnionType
-from typing import Literal, Union, get_args, get_origin, get_type_hints
+from typing import Literal, TypeAlias, Union, cast, get_args, get_origin, get_type_hints
 
 from . import ImplicitDict, StringBasedDateTime, StringBasedTimeDelta, _fullname, _get_fields
 
@@ -31,11 +31,14 @@ SchemaVarsResolver = Callable[[type], SchemaVars]
 
 _implicitdict_doc = inspect.getdoc(ImplicitDict)
 
+SchemaDictV: TypeAlias = Union[bool, str, list["SchemaDictV"], "SchemaDict"]
+SchemaDict: TypeAlias = dict[str, SchemaDictV]
+
 
 def make_json_schema(
     schema_type: type[ImplicitDict],
     schema_vars_resolver: SchemaVarsResolver,
-    schema_repository: dict[str, dict],
+    schema_repository: SchemaDict,
 ) -> None:
     """Create JSON Schema for the specified schema type and all dependencies.
 
@@ -52,7 +55,7 @@ def make_json_schema(
     # Add placeholder to avoid recursive definition attempts while we're making this schema
     schema_repository[schema_vars.name] = {"$generating": True}
 
-    properties = {"$ref": {"type": "string", "description": "Path to content that replaces the $ref"}}
+    properties: SchemaDict = {"$ref": {"type": "string", "description": "Path to content that replaces the $ref"}}
     all_fields, optional_fields = _get_fields(schema_type)
     required_fields = []
     hints = get_type_hints(schema_type)
@@ -80,8 +83,8 @@ def make_json_schema(
             print(f"Warning: Omitting {schema_type.__name__}.{field} from definition because: {e}")
             continue
 
-        if field in field_docs:
-            properties[field]["description"] = field_docs[field]
+        if field in field_docs and isinstance(properties[field], dict):
+            cast(dict, properties[field])["description"] = field_docs[field]
 
     schema = {"$schema": "https://json-schema.org/draft/2020-12/schema", "type": "object", "properties": properties}
     if schema_vars.schema_id is not None:
@@ -90,7 +93,7 @@ def make_json_schema(
     docs = inspect.getdoc(schema_type)
     if docs != _implicitdict_doc:
         if schema_vars.description is not None:
-            schema["description"] = docs + "\n\n" + schema_vars.description
+            schema["description"] = f"{docs}\n\n{schema_vars.description}"
         else:
             schema["description"] = docs
     elif schema_vars.description is not None:
@@ -104,8 +107,8 @@ def make_json_schema(
 
 
 def _schema_for(
-    value_type: type, schema_vars_resolver: SchemaVarsResolver, schema_repository: dict[str, dict], context: type
-) -> tuple[dict, bool]:
+    value_type: type, schema_vars_resolver: SchemaVarsResolver, schema_repository: SchemaDict, context: type
+) -> tuple[SchemaDict, bool]:
     """Get the JSON Schema representation of the value_type.
 
     Args:
@@ -122,6 +125,7 @@ def _schema_for(
           E.g., _schema_for(Optional[float], ...) would indicate True because an Optional[float] field within an
           ImplicitDict would be an optional field in that object.
     """
+
     generic_type = get_origin(value_type)
     if generic_type:
         # Type is generic
@@ -145,9 +149,9 @@ def _schema_for(
         ):
             # Type is an Optional declaration
             subschema, _ = _schema_for(arg_types[0], schema_vars_resolver, schema_repository, context)
-            schema = json.loads(json.dumps(subschema))
+            schema: SchemaDict = json.loads(json.dumps(subschema))
             if "type" in schema:
-                if "null" not in schema["type"]:
+                if not isinstance(schema["type"], list) or "null" not in schema["type"]:
                     schema["type"] = [schema["type"], "null"]
             else:
                 schema = {"oneOf": [{"type": "null"}, schema]}
@@ -166,6 +170,9 @@ def _schema_for(
 
     if issubclass(value_type, ImplicitDict):
         make_json_schema(value_type, schema_vars_resolver, schema_repository)
+
+        if not schema_vars.path_to:
+            raise NotImplementedError(f"SchemaVarsResolver for {value_type} didn't returned a path_to function")
         return {"$ref": schema_vars.path_to(value_type, context)}, False
 
     if value_type is bool or issubclass(value_type, bool):
