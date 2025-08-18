@@ -2,39 +2,40 @@ import enum
 import inspect
 import json
 import re
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
 from types import UnionType
-from typing import Callable, Dict, Literal, Optional, Tuple, Type, Union, get_args, get_origin, get_type_hints
+from typing import Literal, Union, get_args, get_origin, get_type_hints
 
 from . import ImplicitDict, StringBasedDateTime, StringBasedTimeDelta, _fullname, _get_fields
 
 
 @dataclass
-class SchemaVars(object):
+class SchemaVars:
     name: str
     """Unique name that can be used to reference this type/schema."""
 
-    path_to: Optional[Callable[[Type, Type], str]] = None
+    path_to: Callable[[type, type], str] | None = None
     """Function to compute $ref path to schema describing the first type from the schema describing the second type"""
 
-    schema_id: Optional[str] = None
+    schema_id: str | None = None
     """ID of the schema describing this type.  Will be used to populate $schema."""
 
-    description: Optional[str] = None
+    description: str | None = None
     """Description of this type/schema."""
 
 
-SchemaVarsResolver = Callable[[Type], SchemaVars]
+SchemaVarsResolver = Callable[[type], SchemaVars]
 """Function producing the characteristics of a schema (SchemaVars) for a given Type."""
 
 _implicitdict_doc = inspect.getdoc(ImplicitDict)
 
 
 def make_json_schema(
-    schema_type: Type[ImplicitDict],
+    schema_type: type[ImplicitDict],
     schema_vars_resolver: SchemaVarsResolver,
-    schema_repository: Dict[str, dict],
+    schema_repository: dict[str, dict],
 ) -> None:
     """Create JSON Schema for the specified schema type and all dependencies.
 
@@ -103,8 +104,8 @@ def make_json_schema(
 
 
 def _schema_for(
-    value_type: Type, schema_vars_resolver: SchemaVarsResolver, schema_repository: Dict[str, dict], context: Type
-) -> Tuple[dict, bool]:
+    value_type: type, schema_vars_resolver: SchemaVarsResolver, schema_repository: dict[str, dict], context: type
+) -> tuple[dict, bool]:
     """Get the JSON Schema representation of the value_type.
 
     Args:
@@ -198,7 +199,7 @@ def _schema_for(
     raise NotImplementedError(f"Automatic JSON schema generation for {value_type} type is not yet implemented")
 
 
-def _field_docs_for(t: Type[ImplicitDict]) -> Dict[str, str]:
+def _field_docs_for(t: type[ImplicitDict]) -> dict[str, str]:
     # Curse Guido for rejecting PEP224!  Fine, we'll do it ourselves.
     result = {}
     src = inspect.getsource(t)

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-from typing import List, Optional
 
 import pytest
 
@@ -10,7 +9,7 @@ from implicitdict import ImplicitDict
 
 # This object must be defined with future annotations as Python 3.8 will not resolve string-based forward references correctly
 class MassiveNestingData(ImplicitDict):
-    children: Optional[List[MassiveNestingData]]
+    children: list[MassiveNestingData] | None
     foo: str
     bar: int = 0
 

@@ -13,7 +13,7 @@ def _duplicate_tests_with_future_annotations():
         pass
     for filename in os.listdir(this_folder):
         if (filename.startswith("test_") and filename.endswith(".py")) or filename.endswith("_test.py"):
-            with open(os.path.join(this_folder, filename), "r") as f:
+            with open(os.path.join(this_folder, filename)) as f:
                 code = f.read()
             with open(os.path.join(future_annotations_folder, filename), "w") as f:
                 f.write("from __future__ import annotations\n")

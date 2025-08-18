@@ -1,5 +1,4 @@
 import json
-from typing import Type
 
 import jsonschema
 
@@ -19,8 +18,8 @@ from .test_types import (
 )
 
 
-def _resolver(t: Type) -> SchemaVars:
-    def path_to(t_dest: Type, t_src: Type) -> str:
+def _resolver(t: type) -> SchemaVars:
+    def path_to(t_dest: type, t_src: type) -> str:
         return "#/definitions/" + t_dest.__module__ + t_dest.__qualname__
 
     full_name = t.__module__ + t.__qualname__
@@ -28,7 +27,7 @@ def _resolver(t: Type) -> SchemaVars:
     return SchemaVars(name=full_name, path_to=path_to)
 
 
-def _verify_schema_validation(obj, obj_type: Type[ImplicitDict]) -> None:
+def _verify_schema_validation(obj, obj_type: type[ImplicitDict]) -> None:
     repo = {}
     implicitdict.jsonschema.make_json_schema(obj_type, _resolver, repo)
 

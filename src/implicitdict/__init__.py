@@ -4,7 +4,7 @@ import re
 from dataclasses import dataclass
 from datetime import datetime as datetime_type
 from types import UnionType
-from typing import Dict, Literal, Optional, Set, Tuple, Type, Union, get_args, get_origin, get_type_hints
+from typing import Literal, Optional, Union, get_args, get_origin, get_type_hints
 
 import arrow
 import pytimeparse
@@ -14,7 +14,7 @@ _KEY_FIELDS_INFO = "_fields_info"
 _PARSING_ERRORS = (ValueError, TypeError)
 
 
-def _bubble_up_parse_error(child: Union[ValueError, TypeError], field: str) -> Union[ValueError, TypeError]:
+def _bubble_up_parse_error(child: ValueError | TypeError, field: str) -> ValueError | TypeError:
     location_regex = r"^At ([A-Za-z0-9_.[\]]*):((?:.|[\n\r])*)$"
     m = re.search(location_regex, str(child))
     if m:
@@ -90,7 +90,7 @@ class ImplicitDict(dict):
     """
 
     @classmethod
-    def parse(cls, source: Dict, parse_type: Type):
+    def parse(cls, source: dict, parse_type: type):
         if not isinstance(source, dict):
             raise ValueError(
                 f"Expected to find dictionary data to populate {parse_type.__name__} object but instead found {type(source).__name__} type"
@@ -109,7 +109,7 @@ class ImplicitDict(dict):
                 kwargs[key] = value
         return parse_type(**kwargs)
 
-    def __init__(self, previous_instance: Optional[dict] = None, **kwargs):
+    def __init__(self, previous_instance: dict | None = None, **kwargs):
         ancestor_kwargs = {}
         subtype = type(self)
 
@@ -136,19 +136,19 @@ class ImplicitDict(dict):
         for key in all_fields:
             if key not in provided_values:
                 if hasattr(subtype, key):
-                    ancestor_kwargs[key] = super(ImplicitDict, self).__getattribute__(key)
+                    ancestor_kwargs[key] = super().__getattribute__(key)
 
         # Make sure all fields without a default and not labeled Optional were provided
         for key in all_fields:
             if key not in ancestor_kwargs and key not in optional_fields:
-                raise ValueError('Required field "{}" not specified in {}'.format(key, subtype.__name__))
+                raise ValueError(f'Required field "{key}" not specified in {subtype.__name__}')
 
-        super(ImplicitDict, self).__init__(**ancestor_kwargs)
+        super().__init__(**ancestor_kwargs)
 
     def __getattribute__(self, item):
         self_type = type(self)
         if hasattr(self_type, _KEY_FIELDS_INFO):
-            fields_info_by_type: Dict[str, FieldsInfo] = getattr(self_type, _KEY_FIELDS_INFO)
+            fields_info_by_type: dict[str, FieldsInfo] = getattr(self_type, _KEY_FIELDS_INFO)
             self_type_name = _fullname(self_type)
             if self_type_name in fields_info_by_type:
                 if item in fields_info_by_type[self_type_name].all_fields:
@@ -156,28 +156,26 @@ class ImplicitDict(dict):
                         return self[item]
                     except KeyError:
                         raise AttributeError
-        return super(ImplicitDict, self).__getattribute__(item)
+        return super().__getattribute__(item)
 
     def __setattr__(self, key, value):
         self_type = type(self)
         if hasattr(self_type, _KEY_FIELDS_INFO):
-            fields_info_by_type: Dict[str, FieldsInfo] = getattr(self_type, _KEY_FIELDS_INFO)
+            fields_info_by_type: dict[str, FieldsInfo] = getattr(self_type, _KEY_FIELDS_INFO)
             self_type_name = _fullname(self_type)
             if self_type_name in fields_info_by_type:
                 if key in fields_info_by_type[self_type_name].all_fields:
                     self[key] = value
                     return
                 else:
-                    raise AttributeError(
-                        'Attribute "{}" is not defined for "{}" object'.format(key, type(self).__name__)
-                    )
-        super(ImplicitDict, self).__setattr__(key, value)
+                    raise AttributeError(f'Attribute "{key}" is not defined for "{type(self).__name__}" object')
+        super().__setattr__(key, value)
 
     def has_field_with_value(self, field_name: str) -> bool:
         return field_name in self and self[field_name] is not None
 
 
-def _parse_value(value, value_type: Type):
+def _parse_value(value, value_type: type):
     generic_type = get_origin(value_type)
     if generic_type:
         # Type is generic
@@ -225,7 +223,7 @@ def _parse_value(value, value_type: Type):
         elif generic_type is Literal and len(arg_types) == 1:
             # Type is a Literal (parsed value must match specified value)
             if value != arg_types[0]:
-                raise ValueError("Value {} does not match required Literal {}".format(value, arg_types[0]))
+                raise ValueError(f"Value {value} does not match required Literal {arg_types[0]}")
             return value
 
         else:
@@ -244,12 +242,12 @@ def _parse_value(value, value_type: Type):
 
 
 @dataclass
-class FieldsInfo(object):
-    all_fields: Set[str]
-    optional_fields: Set[str]
+class FieldsInfo:
+    all_fields: set[str]
+    optional_fields: set[str]
 
 
-def _get_fields(subtype: Type) -> Tuple[Set[str], Set[str]]:
+def _get_fields(subtype: type) -> tuple[set[str], set[str]]:
     """Determine all fields and optional fields for the specified type.
 
     When all & optional fields are determined for a type, the result is cached
@@ -262,7 +260,7 @@ def _get_fields(subtype: Type) -> Tuple[Set[str], Set[str]]:
     """
     if not hasattr(subtype, _KEY_FIELDS_INFO):
         setattr(subtype, _KEY_FIELDS_INFO, {})
-    fields_info_by_type: Dict[str, FieldsInfo] = getattr(subtype, _KEY_FIELDS_INFO)
+    fields_info_by_type: dict[str, FieldsInfo] = getattr(subtype, _KEY_FIELDS_INFO)
     subtype_name = _fullname(subtype)
     if subtype_name not in fields_info_by_type:
         # Enumerate fields defined for superclasses
@@ -310,7 +308,7 @@ def _get_fields(subtype: Type) -> Tuple[Set[str], Set[str]]:
     return result.all_fields, result.optional_fields
 
 
-def _fullname(class_type: Type) -> str:
+def _fullname(class_type: type) -> str:
     module = class_type.__module__
     if module == "builtins":
         return class_type.__qualname__  # avoid outputs like 'builtins.str'
@@ -323,7 +321,7 @@ class StringBasedTimeDelta(str):
     timedelta: datetime.timedelta
     """Timedelta matching the string value of this instance."""
 
-    def __new__(cls, value: Union[str, datetime.timedelta, int, float], reformat: bool = False):
+    def __new__(cls, value: str | datetime.timedelta | int | float, reformat: bool = False):
         """Create a new StringBasedTimeDelta.
 
         Args:
@@ -353,7 +351,7 @@ class StringBasedDateTime(str):
     datetime: datetime.datetime
     """Timezone-aware datetime matching the string value of this instance."""
 
-    def __new__(cls, value: Union[str, datetime_type, arrow.Arrow], reformat: bool = False):
+    def __new__(cls, value: str | datetime_type | arrow.Arrow, reformat: bool = False):
         """Create a new StringBasedDateTime instance.
 
         Args:
