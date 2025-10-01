@@ -210,7 +210,9 @@ def _parse_value(value, value_type: type):
             return result
 
         elif (
-            (generic_type is Union or generic_type is UnionType) and len(arg_types) == 2 and arg_types[1] is type(None)
+            (generic_type is Union or generic_type is UnionType)
+            and len(arg_types) >= 2
+            and any([arg_type is type(None) for arg_type in arg_types])
         ):
             # Type is an Optional declaration
             if value is None:
@@ -297,7 +299,7 @@ def _get_fields(subtype: type) -> tuple[set[str], set[str]]:
                 optional_fields.add(key)
             elif generic_type is Union or generic_type is UnionType:
                 generic_args = get_args(field_type)
-                if len(generic_args) == 2 and generic_args[1] is type(None):
+                if len(generic_args) >= 2 and any([arg_type is type(None) for arg_type in generic_args]):
                     optional_fields.add(key)
         for key in attributes:
             if key not in annotations:

@@ -110,6 +110,10 @@ class OptionalData(ImplicitDict):
     optional_field2_with_none_default: Optional[str] = None  # noqa UP045
     optional_field3_with_default: Optional[str] = "concrete default"  # noqa UP045
     new_style_optional: str | None
+    new_style_optional_2: str | bool | None
+    new_style_optional_3: str | None | bool
+    new_style_optional_4: None | str | bool
+    new_style_optional_5: str | list[str] | None | list[bool] | bool
 
     @staticmethod
     def example_values():
