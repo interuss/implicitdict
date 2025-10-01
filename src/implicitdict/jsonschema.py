@@ -145,7 +145,9 @@ def _schema_for(
             return schema, False
 
         elif (
-            (generic_type is Union or generic_type is UnionType) and len(arg_types) == 2 and arg_types[1] is type(None)
+            (generic_type is Union or generic_type is UnionType)
+            and len(arg_types) >= 2
+            and any([arg_type is type(None) for arg_type in arg_types])
         ):
             # Type is an Optional declaration
             subschema, _ = _schema_for(arg_types[0], schema_vars_resolver, schema_repository, context)
