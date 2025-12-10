@@ -4,7 +4,15 @@ import re
 from dataclasses import dataclass
 from datetime import datetime as datetime_type
 from types import UnionType
-from typing import Literal, Optional, Union, get_args, get_origin, get_type_hints  # pyright:ignore[reportDeprecated]
+from typing import (  # pyright:ignore[reportDeprecated]
+    Literal,
+    Optional,
+    Self,
+    Union,
+    get_args,
+    get_origin,
+    get_type_hints,
+)
 
 import arrow
 import pytimeparse
@@ -101,7 +109,7 @@ class ImplicitDict(dict):
             if key in hints:
                 # This entry has an explicit type
                 try:
-                    kwargs[key] = _parse_value(value, hints[key])
+                    kwargs[key] = _parse_value(value, hints[key], parse_type)
                 except _PARSING_ERRORS as e:
                     raise _bubble_up_parse_error(e, key)
             else:
@@ -175,7 +183,7 @@ class ImplicitDict(dict):
         return field_name in self and self[field_name] is not None
 
 
-def _parse_value(value, value_type: type):
+def _parse_value(value, value_type: type, root_type: type):
     generic_type = get_origin(value_type)
     if generic_type:
         # Type is generic
@@ -192,7 +200,7 @@ def _parse_value(value, value_type: type):
             result = []
             for i, v in enumerate(value_list):
                 try:
-                    result.append(_parse_value(v, arg_types[0]))
+                    result.append(_parse_value(v, arg_types[0], root_type))
                 except _PARSING_ERRORS as e:
                     raise _bubble_up_parse_error(e, f"[{i}]")
             return result
@@ -201,9 +209,9 @@ def _parse_value(value, value_type: type):
             # value is a dict of some kind
             result = {}
             for k, v in value.items():
-                parsed_key = k if arg_types[0] is str else _parse_value(k, arg_types[0])
+                parsed_key = k if arg_types[0] is str else _parse_value(k, arg_types[0], root_type)
                 try:
-                    parsed_value = _parse_value(v, arg_types[1])
+                    parsed_value = _parse_value(v, arg_types[1], root_type)
                 except _PARSING_ERRORS as e:
                     raise _bubble_up_parse_error(e, k)
                 result[parsed_key] = parsed_value
@@ -220,7 +228,7 @@ def _parse_value(value, value_type: type):
                 # omitting the field's value
                 return None
             else:
-                return _parse_value(value, arg_types[0])
+                return _parse_value(value, arg_types[0], root_type)
 
         elif generic_type is Literal and len(arg_types) == 1:
             # Type is a Literal (parsed value must match specified value)
@@ -231,12 +239,15 @@ def _parse_value(value, value_type: type):
         else:
             raise ValueError(f"Automatic parsing of {value_type} type is not yet implemented")
 
+    elif value_type == Self:
+        # value is outself type
+        return ImplicitDict.parse(value, root_type)
     elif issubclass(value_type, ImplicitDict):
         # value is an ImplicitDict
         return ImplicitDict.parse(value, value_type)
 
     if hasattr(value_type, "__orig_bases__") and value_type.__orig_bases__:
-        return value_type(_parse_value(value, value_type.__orig_bases__[0]))
+        return value_type(_parse_value(value, value_type.__orig_bases__[0], root_type))
 
     else:
         # value is a non-generic type that is not an ImplicitDict

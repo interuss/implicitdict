@@ -1,4 +1,5 @@
 import json
+from typing import Self
 
 import jsonschema
 
@@ -8,11 +9,13 @@ from implicitdict.jsonschema import SchemaVars
 
 from .test_types import (
     ContainerData,
+    HiddenReferencingSelf,
     InheritanceData,
     NestedDefinitionsData,
     NormalUsageData,
     OptionalData,
     PropertiesData,
+    ReferencingSelf,
     SpecialSubclassesContainer,
     SpecialTypesData,
 )
@@ -28,10 +31,26 @@ def _resolver(t: type) -> SchemaVars:
 
 
 def _verify_schema_validation(obj, obj_type: type[ImplicitDict]) -> None:
-    repo = {}
-    implicitdict.jsonschema.make_json_schema(obj_type, _resolver, repo)
+    def _root_resolver(t: type) -> SchemaVars:
+        """Special resolver that references '#' for Self at root of the schema"""
 
-    name = _resolver(obj_type).name
+        if t == Self:
+
+            def path_to(t_dest: type, t_src: type) -> str:
+                if t_src == obj_type:
+                    return "#"
+                else:
+                    return "#/definitions/" + t_dest.__module__ + t_dest.__qualname__
+
+            full_name = t.__module__ + t.__qualname__
+            return SchemaVars(name=full_name, path_to=path_to)
+
+        return _resolver(t)
+
+    repo = {}
+    implicitdict.jsonschema.make_json_schema(obj_type, _root_resolver, repo)
+
+    name = _root_resolver(obj_type).name
     schema = repo[name]
     del repo[name]
     if repo:
@@ -113,3 +132,13 @@ def test_special_types():
 def test_nested_definitions():
     data = NestedDefinitionsData.example_value()
     _verify_schema_validation(data, NestedDefinitionsData)
+
+
+def test_self():
+    data = ReferencingSelf.example_value()
+    _verify_schema_validation(data, ReferencingSelf)
+
+
+def test_hidden_self():
+    data = HiddenReferencingSelf.example_value()
+    _verify_schema_validation(data, HiddenReferencingSelf)

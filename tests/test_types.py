@@ -2,7 +2,7 @@
 # comments)
 import enum
 from datetime import UTC, datetime
-from typing import List, Optional  # noqa UP035
+from typing import List, Optional, Self  # noqa UP035
 
 from implicitdict import ImplicitDict, StringBasedDateTime, StringBasedTimeDelta
 
@@ -209,4 +209,48 @@ class NestedDefinitionsData(ImplicitDict):
                 }
             },
             NestedDefinitionsData,
+        )
+
+
+class ReferencingSelf(ImplicitDict):
+    foo: str
+    bar: Self | None
+
+    @staticmethod
+    def example_value():
+        return ImplicitDict.parse(
+            {
+                "foo": "foo",
+                "bar": {
+                    "foo": "subfoo",
+                },
+            },
+            ReferencingSelf,
+        )
+
+
+class HiddenReferencingSelf(ImplicitDict):
+    baz: ReferencingSelf
+    bazs: list[ReferencingSelf]
+
+    @staticmethod
+    def example_value():
+        return ImplicitDict.parse(
+            {
+                "baz": {
+                    "foo": "foo",
+                    "bar": {
+                        "foo": "subfoo",
+                    },
+                },
+                "bazs": [
+                    {
+                        "foo": "foo",
+                        "bar": {
+                            "foo": "subfoo",
+                        },
+                    }
+                ],
+            },
+            HiddenReferencingSelf,
         )
