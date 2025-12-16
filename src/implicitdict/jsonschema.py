@@ -6,7 +6,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
 from types import UnionType
-from typing import Literal, TypeAlias, Union, cast, get_args, get_origin, get_type_hints
+from typing import Literal, Self, TypeAlias, Union, cast, get_args, get_origin, get_type_hints
 
 from . import ImplicitDict, StringBasedDateTime, StringBasedTimeDelta, _fullname, _get_fields
 
@@ -169,6 +169,12 @@ def _schema_for(
             )
 
     schema_vars = schema_vars_resolver(value_type)
+
+    if value_type == Self:
+        if not schema_vars.path_to:
+            raise NotImplementedError(f"SchemaVarsResolver for {value_type} didn't returned a path_to function")
+
+        return {"$ref": schema_vars.path_to(context, context)}, False
 
     if issubclass(value_type, ImplicitDict):
         make_json_schema(value_type, schema_vars_resolver, schema_repository)
