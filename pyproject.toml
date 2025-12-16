@@ -29,7 +29,7 @@ authors = [
 description = "ImplicitDict base class that turns a subclass into a dict indexing attributes, making [de]serialization easy for complex typing-annotated data types."
 readme = "README.md"
 license = "Apache-2.0"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
@@ -56,7 +56,7 @@ dev = [
 
 
 [tool.ruff]
-target-version = "py310"
+target-version = "py311"
 
 # Default + isort + pyupgrade
 lint.select = [

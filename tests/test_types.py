@@ -1,7 +1,7 @@
 # This file use old typing style on purpose to test compatibiliy (noqa
 # comments)
 import enum
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import List, Optional  # noqa UP035
 
 from implicitdict import ImplicitDict, StringBasedDateTime, StringBasedTimeDelta
@@ -189,7 +189,7 @@ class SpecialTypesData(ImplicitDict):
     @staticmethod
     def example_value():
         return ImplicitDict.parse(
-            {"datetime": datetime.now(timezone.utc).isoformat(), "timedelta": "12h", "yesno": "Yes", "boolean": "true"},
+            {"datetime": datetime.now(UTC).isoformat(), "timedelta": "12h", "yesno": "Yes", "boolean": "true"},
             SpecialTypesData,
         )
 
@@ -202,7 +202,7 @@ class NestedDefinitionsData(ImplicitDict):
         return ImplicitDict.parse(
             {
                 "special_types": {
-                    "datetime": datetime.now(timezone.utc).isoformat(),
+                    "datetime": datetime.now(UTC).isoformat(),
                     "timedelta": "12h",
                     "yesno": "Yes",
                     "boolean": "true",
