@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from datetime import datetime
-from typing import Tuple, Optional, Self
+from typing import Optional, Self, Tuple  # noqa UP045, UP006
 
 import pytest
 
@@ -11,14 +11,14 @@ from implicitdict import ImplicitDict, StringBasedDateTime, StringBasedTimeDelta
 
 class WithTuples(ImplicitDict):
     all_floats: tuple[float, float]
-    big_tuple: Tuple[str, str]
-    mixed_values: Optional[tuple[str, float]]
-    nested_tuples: Optional[tuple[tuple[float, int], str]]
-    nested_self: Optional[tuple[str, Self]]
-    times: Optional[tuple[StringBasedDateTime, StringBasedTimeDelta]]
-    lists: Optional[tuple[list[tuple[str, float]], str | None]]
-    dicts: Optional[dict[int, tuple[str, dict[str, int]]]]
-    long_tuple: Optional[tuple[bool, str, int, float, list[str], dict[str, str], tuple[int, int, int]]]
+    big_tuple: Tuple[str, str]  # noqa UP006
+    mixed_values: Optional[tuple[str, float]]  # noqa UP045
+    nested_tuples: Optional[tuple[tuple[float, int], str]]  # noqa UP045
+    nested_self: Optional[tuple[str, Self]]  # noqa UP045
+    times: Optional[tuple[StringBasedDateTime, StringBasedTimeDelta]]  # noqa UP045
+    lists: Optional[tuple[list[tuple[str, float]], str | None]]  # noqa UP045
+    dicts: Optional[dict[int, tuple[str, dict[str, int]]]]  # noqa UP045
+    long_tuple: Optional[tuple[bool, str, int, float, list[str], dict[str, str], tuple[int, int, int]]]  # noqa UP045
 
     @staticmethod
     def example_values() -> dict[str, WithTuples]:
