@@ -356,10 +356,10 @@ class StringBasedTimeDelta(str):
             reformat: If true, override a provided string with a string representation of the parsed timedelta.
         """
         if isinstance(value, str):
-            seconds = pytimeparse2.parse(value)
-            if seconds is None:
+            dt = pytimeparse2.parse(value, as_timedelta=True)
+            if dt is None:
                 raise ValueError(f"Could not parse type {type(value).__name__} into StringBasedTimeDelta")
-            dt = datetime.timedelta(seconds=seconds)
+            assert isinstance(dt, datetime.timedelta)
             s = str(dt) if reformat else value
         elif isinstance(value, float) or isinstance(value, int):
             dt = datetime.timedelta(seconds=value)
