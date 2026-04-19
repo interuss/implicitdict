@@ -15,7 +15,7 @@ from typing import (  # pyright:ignore[reportDeprecated]
 )
 
 import arrow
-import pytimeparse
+import pytimeparse2
 
 _DICT_FIELDS = set(dir({}))
 _KEY_FIELDS_INFO = "_fields_info"
@@ -351,12 +351,12 @@ class StringBasedTimeDelta(str):
         """Create a new StringBasedTimeDelta.
 
         Args:
-            value: Timedelta representation.  May be a pytimeparse-compatible string, Python timedelta, or number of
+            value: Timedelta representation.  May be a pytimeparse2-compatible string, Python timedelta, or number of
               seconds (float).
             reformat: If true, override a provided string with a string representation of the parsed timedelta.
         """
         if isinstance(value, str):
-            seconds = pytimeparse.parse(value)
+            seconds = pytimeparse2.parse(value)
             if seconds is None:
                 raise ValueError(f"Could not parse type {type(value).__name__} into StringBasedTimeDelta")
             dt = datetime.timedelta(seconds=seconds)
