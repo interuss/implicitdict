@@ -205,6 +205,17 @@ def _parse_value(value, value_type: type, root_type: type):
                     raise _bubble_up_parse_error(e, f"[{i}]")
             return result
 
+        elif generic_type is tuple:
+            if len(value) != len(arg_types):
+                raise ValueError(f"Cannot parse {len(value)} values into a tuple[{', '.join(t.__name__ for t in arg_types)}]")
+            result = []
+            for i in range(len(value)):
+                try:
+                    result.append(_parse_value(value[i], arg_types[i], root_type))
+                except _PARSING_ERRORS as e:
+                    raise _bubble_up_parse_error(e, f"[{i}]")
+            return tuple(result)
+
         elif generic_type is dict:
             # value is a dict of some kind
             result = {}
