@@ -32,7 +32,7 @@ class WithTuples(ImplicitDict):
                 times=(StringBasedDateTime(datetime.now()), StringBasedTimeDelta("1h")),
                 lists=([("foo", 10), ("bar", 100)], None),
                 dicts={42: ("1", {"foo": 9}), 314: ("a", {"bar": 7})},
-                long_tuple=(False, "foo", 8888, 1e7, [], {}, (1, 2, 3))
+                long_tuple=(False, "foo", 8888, 1e7, [], {}, (1, 2, 3)),
             )
         }
 

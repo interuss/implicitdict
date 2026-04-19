@@ -207,7 +207,9 @@ def _parse_value(value, value_type: type, root_type: type):
 
         elif generic_type is tuple:
             if len(value) != len(arg_types):
-                raise ValueError(f"Cannot parse {len(value)} values into a tuple[{', '.join(t.__name__ for t in arg_types)}]")
+                raise ValueError(
+                    f"Cannot parse {len(value)} values into a tuple[{', '.join(t.__name__ for t in arg_types)}]"
+                )
             result = []
             for i in range(len(value)):
                 try:
