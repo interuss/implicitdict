@@ -15,7 +15,7 @@ from typing import (  # pyright:ignore[reportDeprecated]
 )
 
 import arrow
-import pytimeparse
+import pytimeparse2
 
 _DICT_FIELDS = set(dir({}))
 _KEY_FIELDS_INFO = "_fields_info"
@@ -205,6 +205,19 @@ def _parse_value(value, value_type: type, root_type: type):
                     raise _bubble_up_parse_error(e, f"[{i}]")
             return result
 
+        elif generic_type is tuple:
+            if len(value) != len(arg_types):
+                raise ValueError(
+                    f"Cannot parse {len(value)} values into a tuple[{', '.join(t.__name__ for t in arg_types)}]"
+                )
+            result = []
+            for i in range(len(value)):
+                try:
+                    result.append(_parse_value(value[i], arg_types[i], root_type))
+                except _PARSING_ERRORS as e:
+                    raise _bubble_up_parse_error(e, f"[{i}]")
+            return tuple(result)
+
         elif generic_type is dict:
             # value is a dict of some kind
             result = {}
@@ -338,14 +351,15 @@ class StringBasedTimeDelta(str):
         """Create a new StringBasedTimeDelta.
 
         Args:
-            value: Timedelta representation.  May be a pytimeparse-compatible string, Python timedelta, or number of
+            value: Timedelta representation.  May be a pytimeparse2-compatible string, Python timedelta, or number of
               seconds (float).
             reformat: If true, override a provided string with a string representation of the parsed timedelta.
         """
         if isinstance(value, str):
-            seconds = pytimeparse.parse(value)
+            seconds = pytimeparse2.parse(value)
             if seconds is None:
                 raise ValueError(f"Could not parse type {type(value).__name__} into StringBasedTimeDelta")
+            assert isinstance(seconds, float) or isinstance(seconds, int)
             dt = datetime.timedelta(seconds=seconds)
             s = str(dt) if reformat else value
         elif isinstance(value, float) or isinstance(value, int):

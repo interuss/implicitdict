@@ -37,7 +37,7 @@ classifiers = [
 dependencies = [
   "arrow",
   "jsonschema",
-  "pytimeparse"
+  "pytimeparse2"
 ]
 
 [dependency-groups]
