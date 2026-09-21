@@ -1,7 +1,5 @@
 import json
 
-import pytest
-
 from implicitdict import ImplicitDict
 
 from .test_types import OptionalData
@@ -43,11 +41,12 @@ def test_minimally_defined():
     assert "field_with_default" in data
     assert "optional_field2_with_none_default" in data
     assert "optional_field3_with_default" in data
-    with pytest.raises(AttributeError):
-        # Trying to reference the Optional field will result in a AttributeError
-        # To determine whether an Optional field is present, the user must check
-        # whether `"<FIELD_NAME>" in <OBJECT>` (see above).
-        assert data.optional_field1 is None
+
+    # Referencing the Optional field will return None.
+    # To differentiate between an actual value of None and the field being absent,
+    # the user must check whether `"<FIELD_NAME>" in <OBJECT>` (see above).
+    assert data.optional_field1 is None
+
     s = json.dumps(data)
     assert "required_field" in s
     assert "optional_field1" not in s
@@ -62,7 +61,10 @@ def test_getattr():
 
     data = OptionalData.example_values()["minimally_defined"]
     assert "optional_field1" not in data
-    assert getattr(data, "optional_field1", "getattrdefault") == "getattrdefault"
+
+    # To differentiate between an actual value of None and the field being absent,
+    # the user must check whether `"<FIELD_NAME>" in <OBJECT>` (see above).
+    assert getattr(data, "optional_field1", "getattrdefault") is None
 
 
 def test_provide_optional_field():

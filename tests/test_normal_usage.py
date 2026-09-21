@@ -24,8 +24,8 @@ def test_basic_usage():
 
     # Optional fields that aren't specified simply don't exist
     assert "baz" not in data
-    with pytest.raises(AttributeError):
-        assert data.baz == 0
+    # ...but they default to None when the attribute is accessed
+    assert data.baz is None
 
     # Optional fields can be omitted (fields with defaults are optional)
     data = NormalUsageData(foo="asdf")

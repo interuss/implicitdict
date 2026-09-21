@@ -160,10 +160,13 @@ class ImplicitDict(dict):
             self_type_name = _fullname(self_type)
             if self_type_name in fields_info_by_type:
                 if item in fields_info_by_type[self_type_name].all_fields:
-                    try:
-                        return self[item]
-                    except KeyError:
-                        raise AttributeError
+                    if item in fields_info_by_type[self_type_name].optional_fields:
+                        return self[item] if item in self else None
+                    else:
+                        try:
+                            return self[item]
+                        except KeyError:
+                            raise AttributeError
         return super().__getattribute__(item)
 
     def __setattr__(self, key, value):

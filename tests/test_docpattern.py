@@ -8,9 +8,15 @@ class ResponseType(ImplicitDict):
     pass
 
 
+class QueryResponse(ImplicitDict):
+    json: dict
+
+
 class Query(ImplicitDict):
     participant_id: str | None
     """If specified, identifier of the USS/participant hosting the server involved in this query."""
+
+    response: QueryResponse
 
     def parse_json_result(self, parse_type: type[ResponseType]) -> ResponseType:
         """Parses the JSON result into the specified type.
