@@ -1,4 +1,5 @@
 import datetime
+import functools
 import inspect
 import re
 from dataclasses import dataclass
@@ -20,6 +21,11 @@ import pytimeparse2
 _DICT_FIELDS = set(dir({}))
 _KEY_FIELDS_INFO = "_fields_info"
 _PARSING_ERRORS = (ValueError, TypeError)
+
+
+@functools.cache
+def _get_cached_type_hint(t: type) -> dict:
+    return get_type_hints(t)
 
 
 def _bubble_up_parse_error(child: ValueError | TypeError, field: str) -> ValueError | TypeError:
@@ -95,6 +101,11 @@ class ImplicitDict(dict):
         def __init__(self, **kwargs):
           self.e = 5
           super(ImplicitDict, self).__init__(**kwargs)
+
+    The fields and field type annotations of an ImplicitDict subclass are cached on
+    first use: adding, removing or modifying them afterwards (e.g. via
+    __annotations__, by setting class attributes or by redefining a
+    forward-referenced type) is not supported.
     """
 
     @classmethod
@@ -104,7 +115,7 @@ class ImplicitDict(dict):
                 f"Expected to find dictionary data to populate {parse_type.__name__} object but instead found {type(source).__name__} type"
             )
         kwargs = {}
-        hints = get_type_hints(parse_type)
+        hints = _get_cached_type_hint(parse_type)
         for key, value in source.items():
             if key in hints:
                 # This entry has an explicit type
